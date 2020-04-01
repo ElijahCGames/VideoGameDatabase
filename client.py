@@ -80,7 +80,7 @@ class App(Tk):
         """
         Adds the rest of the frames
         """
-         for F in self.mainPages:
+        for F in self.mainPages:
             page_name = F.__name__
             frame = F(parent=self.container,controller=self)
             self.frames[page_name] = frame
