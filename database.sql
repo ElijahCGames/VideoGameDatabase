@@ -19,14 +19,16 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer` (
 CREATE TABLE IF NOT EXISTS `gamePlay`.`publisher` (
 	`publisherID` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
-    `location` VARCHAR(255) NOT NULL,
+    `city` VARCHAR(45) NOT NULL,
+    `country` VARCHAR(45) NOT NULL,
     CONSTRAINT publisher_pk PRIMARY KEY (`publisherID`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`developer` (
 	`developerID` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
-    `location` VARCHAR(255) NOT NULL,
+    `city` VARCHAR(45) NOT NULL,
+    `country` VARCHAR(45) NOT NULL,
     CONSTRAINT developer_pk PRIMARY KEY (`developerID`))
 ;
 
@@ -94,6 +96,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer_game` (
 	`reviewerID` INT NOT NULL,
 	`gameID` INT NOT NULL,
 	`reviewScore` INT NOT NULL,
+	`url` VARCHAR(100) NOT NULL,
     CONSTRAINT reviewergame_pk PRIMARY KEY (`reviewerID`, `gameID`),
 	CONSTRAINT game_review_fk1 FOREIGN KEY (`reviewerID`) 
 			references reviewer(`reviewerID`) 
@@ -111,30 +114,6 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`platform_game` (
 		references platform(`platformID`) 
         ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT game_platform_fk2 FOREIGN KEY (`gameID`) 
-		references game(`gameID`) 
-        ON UPDATE CASCADE ON DELETE CASCADE)
-;
-
-CREATE TABLE IF NOT EXISTS `gamePlay`.`gameplayGenre_game` (
-	`gGenreID` INT NOT NULL,
-	`gameID` INT NOT NULL,
-    CONSTRAINT ggenre_game_pk PRIMARY KEY (`gGenreID`, `gameID`),
-	CONSTRAINT game_gameplay_fk1 FOREIGN KEY (`gGenreID`) 
-		references gameplayGenre(`gGenreID`) 
-        ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT game_gameplay_fk2 FOREIGN KEY (`gameID`) 
-		references game(`gameID`) 
-        ON UPDATE CASCADE ON DELETE CASCADE)
-;
-
-CREATE TABLE IF NOT EXISTS `gamePlay`.`aesthicGenre_game` (
-	`aGenreID` INT NOT NULL,
-	`gameID` INT NOT NULL,
-    CONSTRAINT agenre_game_pk PRIMARY KEY (`aGenreID`, `gameID`),
-	CONSTRAINT game_aesthics_fk1 FOREIGN KEY (`aGenreID`) 
-		references aestheticGenre(`aGenreID`) 
-        ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT game_aesthics_fk2 FOREIGN KEY (`gameID`) 
 		references game(`gameID`) 
         ON UPDATE CASCADE ON DELETE CASCADE)
 ;

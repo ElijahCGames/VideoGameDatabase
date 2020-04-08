@@ -1,0 +1,3 @@
+gameID,Title,Description ,developerID,publisherID,ageRating,gameplayGenre,aestheticGenre,localPlayer,onlinePlayer,has_multiplayer,has_campagin,completionTime
+1,Animal Crossing: New Horizons,,1,1,E,2,2,8,8,TRUE,TRUE,50
+2,Persona 5,,2,2,M,1,1,0,0,FALSE,TRUE,80
