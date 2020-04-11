@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`game` (
     `description` VARCHAR(255) NOT NULL,
 	`developerID` INT NOT NULL,
 	`publisherID` INT NOT NULL,
-	`ageRating` INT NOT NULL,
+	`ageRating` VARCHAR(45) NOT NULL,
     `gameplayGenre` INT NOT NULL,
 	`aestheticGenre` INT NOT NULL,
 	`localPlayer` VARCHAR(45),
