@@ -3,36 +3,38 @@ USE `gamePlay`;
 
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`player` (
-	`playerID` INT NOT NULL,
+	`playerID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
     `gender` VARCHAR(45) NOT NULL,
     CONSTRAINT player_pk PRIMARY KEY (`playerID`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer` (
-	`reviewerID` INT NOT NULL,
+	`reviewerID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
     `website` VARCHAR(255) NOT NULL,
     CONSTRAINT reviewer_pk PRIMARY KEY (`reviewerID`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`publisher` (
-	`publisherID` INT NOT NULL,
+	`publisherID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
-    `city` VARCHAR(45) NOT NULL,
-    `country` VARCHAR(45) NOT NULL,
-    CONSTRAINT publisher_pk PRIMARY KEY (`publisherID`))
+	`locationIndex` INT NOT NULL,
+    CONSTRAINT publisher_pk PRIMARY KEY (`publisherID`),
+	CONSTRAINT developer_fk FOREIGN KEY (`locationIndex`) 
+		references location(`locationIndex`) 
+        ON UPDATE CASCADE ON DELETE CASCADE)
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`location` (
-	`locationIndex` INT NOT NULL,
+	`locationIndex` INT NOT NULL AUTO_INCREMENT,
     `City` VARCHAR(45) NOT NULL,
     `Country` VARCHAR(45) NOT NULL,
     CONSTRAINT player_pk PRIMARY KEY (`locationIndex`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`developer` (
-	`developerID` INT NOT NULL,
+	`developerID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
 	`locationIndex` INT NOT NULL,
     CONSTRAINT developer_pk PRIMARY KEY (`developerID`),
@@ -42,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`developer` (
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`platform` (
-	`platformID` INT NOT NULL,
+	`platformID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
     CONSTRAINT platform_pk PRIMARY KEY (`platformID`))
 ;
@@ -60,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`aestheticGenre` (
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`game` (
-	`gameID` INT NOT NULL,
+	`gameID` INT NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(45) NOT NULL,
     `description` VARCHAR(255) NOT NULL,
 	`developerID` INT NOT NULL,
