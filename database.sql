@@ -24,12 +24,21 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`publisher` (
     CONSTRAINT publisher_pk PRIMARY KEY (`publisherID`))
 ;
 
+CREATE TABLE IF NOT EXISTS `gamePlay`.`location` (
+	`locationIndex` INT NOT NULL,
+    `City` VARCHAR(45) NOT NULL,
+    `Country` VARCHAR(45) NOT NULL,
+    CONSTRAINT player_pk PRIMARY KEY (`locationIndex`))
+;
+
 CREATE TABLE IF NOT EXISTS `gamePlay`.`developer` (
 	`developerID` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
-    `city` VARCHAR(45) NOT NULL,
-    `country` VARCHAR(45) NOT NULL,
-    CONSTRAINT developer_pk PRIMARY KEY (`developerID`))
+	`locationIndex` INT NOT NULL,
+    CONSTRAINT developer_pk PRIMARY KEY (`developerID`),
+	CONSTRAINT developer_fk FOREIGN KEY (`locationIndex`) 
+		references location(`locationIndex`) 
+        ON UPDATE CASCADE ON DELETE CASCADE)
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`platform` (
@@ -59,11 +68,11 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`game` (
 	`ageRating` VARCHAR(45) NOT NULL,
     `gameplayGenre` INT NOT NULL,
 	`aestheticGenre` INT NOT NULL,
-	`localPlayer` VARCHAR(45),
-	`onlinePlayer` VARCHAR(45),
+	`localPlayer` INT,
+	`onlinePlayer` INT,
 	`has_multiplayer` VARCHAR(45) NOT NULL,
 	`has_campaign` VARCHAR(45) NOT NULL,
-	`completionTime` TIME,
+	`completionTime` INT,
     CONSTRAINT game_pk PRIMARY KEY (`gameID`),
 	CONSTRAINT game_fk1 FOREIGN KEY (`developerID`) 
 		references developer(`developerID`) 
