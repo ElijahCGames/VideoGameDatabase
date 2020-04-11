@@ -1,3 +1,29 @@
-publisherID,Name,City,Country
-1,Nintendo,Kyoto,Japan
-2,Atlus,Tokyo,Japan
+publisherID,Name,LocationIndex
+1,Nintendo,2
+2,Atlus,1
+3,Ubisoft,7
+4,Electronic Arts,3
+5,Activision Blizzard,4
+6,Bethesda Softworks,5
+7,Platinum Games,6
+8,Sony Interactive Entertainment (SIE),1
+9,Xbox Game Studios,8
+10,Bandai Namco Entertainment,1
+11,Square Enix,1
+12,Matt Makes Games,9
+13,Yacht Club Games,10
+14,CD Projekt,29
+15,Warner Bros. Interactive Entertainment,17
+16,Rockstar Games,30
+17,2K Games,31
+18,Capcom,6
+19,Paradox Interactive,24
+20,SEGA,1
+21,Devolver Digital,33
+22,Konami,1
+23,Koei Tecmo,34
+24,505 Games,35
+25,tinyBuild,15
+26,Focus Home Interactive,36
+27,Deep Silver,37
+28,Arc System Works,1

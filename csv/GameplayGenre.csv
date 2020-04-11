@@ -1,3 +1,35 @@
 gGenreID,gGenreTitle
 1,JRPG
 2,Simulation
+3,Third-Person Shooter
+4,First-Person Shooter
+5,Platformer
+6,Turn-Based Strategy
+7,RPG
+8,RTS
+9,MMO
+10,MMORPG
+11,MOBA
+12,Fighting
+13,Beat 'em up
+14,Stealth
+15,Survival
+16,Battle Royale
+17,Rhythm
+18,Action-Adventure
+19,Survival Horror
+20,Metroidvania
+21,Visual Novel
+22,Action RPG
+23,Roguelike
+24,Tactical RPG
+25,Simulation
+26,4X
+27,Racing
+28,Sports
+29,Casual
+30,Board/Card Game
+31,CCG
+32,Party
+33,Puzzle
+34,Action

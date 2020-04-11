@@ -1,3 +1,43 @@
-developerID,Name,City,Country
-1,Nintedo EPD,Kyoto,Japan
-2,P Studio,Tokyo,Japan
+developerID,Name,LocationIndex
+1,Nintedo EPD,2
+2,P Studio,1
+3,Square Enix,1
+4,Matt Makes Games,9
+5,Platinum Games,6
+6,Infinity Ward,10
+7,Yacht Club Games,10
+8,Next Level Games,9
+9,Moon Studios,12
+10,SIE Santa Monica Studio,4
+11,Naughty Dog,4
+12,SIE Japan Studio,1
+13,SIE Bend Studio,13
+14,Guerrilla Games,14
+15,Sucker Punch Productions,15
+16,SIE San Diego Studio,16
+17,Insomniac Games,17
+18,SIE San Mateo Studio,18
+19,SIE London Studio,19
+20,Media Molecule,20
+21,Pixelopus,18
+22,Polyphony Digital,1
+23,343 Industries,3
+24,Compulsion Games,21
+25,inXile Entertainment,22
+26,Double Fine,23
+27,Mojang,24
+28,Ninja Theory,25
+29,Obsidian Entertainment,11
+30,Playground Games,26
+31,Rare,27
+32,The Coalition,9
+33,The Initiative,18
+34,Turn 10 Studios,8
+35,Undead Labs,28
+36,World's Edge,8
+37,CD Projekt,29
+38,Bethesda Game Studios,5
+39,Rockstar Games,30
+40,Gearbox Software,32
+41,Arc System Works,1
+42,Bungie,15
