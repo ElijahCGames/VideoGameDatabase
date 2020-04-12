@@ -1,0 +1,17 @@
+-- add a new player to player table 
+DELIMITER //
+CREATE PROCEDURE add_player(IN username VARCHAR(45), IN gender VARCHAR(45))
+BEGIN
+	INSERT INTO player (name,gender) VALUES(username,gender);
+END //
+DELIMITER ;
+
+
+-- delete a user from the player table
+DELIMITER // 
+CREATE PROCEDURE Delete_player ( IN username VARCHAR(45))
+BEGIN
+	DELETE FROM player
+	WHERE name = username;
+END //
+DELIMITER ;
