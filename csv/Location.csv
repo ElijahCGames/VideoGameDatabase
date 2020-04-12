@@ -1,37 +1,37 @@
-﻿Index,City,Country
+﻿Index,City,State/Province,Country
 1,Tokyo,Japan
 2,Kyoto,Japan
-3,"Redwood City, California",United States of America
-4,"Santa Monica, California",United States of America
-5,"Rockville, Maryland",United States of America
+3,Redwood City,California,United States of America
+4,Santa Monica,California,United States of America
+5,Rockville,Maryland,United States of America
 6,Osaka,Japan
 7,Montreuil,France
-8,"Redmond, Washington",United States of America
-9,"Vancouver, BC",Canada
-10,"Los Angeles, California",United States of America
-11,"Irvine, California",United States of America
+8,Redmond,Washington,United States of America
+9,Vancouver,BC,Canada
+10,Los Angeles, California,United States of America
+11,Irvine, California,United States of America
 12,Vienna,Austria
-13,Bend,Oregon
+13,Bend,Oregon,United States of America
 14,Amsterdam,Netherlands
-15,"Bellevue, Washington",United States of America
-16,"San Diego, California",United States of America
-17,"Burbank, California",United States of America
-18,"San Mateo, California",United States of America
+15,Bellevue,Washington,United States of America
+16,San Diego,California,United States of America
+17,Burbank,California,United States of America
+18,San Mateo,California,United States of America
 19,London,England
 20,Surrey,England
-21,"Montreal, Quebec",Canada
-22,"Newport Beach, California",United States of America
-23,"San Fransisco, California",United States of America
+21,Montreal,Quebec,Canada
+22,Newport Beach,California,United States of America
+23,San Fransisco,California,United States of America
 24,Stockholm,Sweden
 25,Cambridge,England
 26,Leamington Spa,England
 27,Twycross,England
-28,"Seattle, Washington",United States of America
+28,Seattle,Washington,United States of America
 29,Warsaw,Poland
-30,"New York, New York",United States of America
-31,"Novato, California",United States of America
-32,"Frisco, Texas",United States of America
-33,"Austin, Texas",United States of America
+30,New York,New York,United States of America
+31,Novato,California,United States of America
+32,Frisco,Texas,United States of America
+33,Austin,Texas,United States of America
 34,Yokohama,Japan
 35,Milan,Italy
 36,Paris,France

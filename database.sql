@@ -3,10 +3,10 @@ USE `gamePlay`;
 
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`player` (
-	`playerID` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(45) NOT NULL,
+	`id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(45) UNIQUE NOT NULL,
     `gender` VARCHAR(45) NOT NULL,
-    CONSTRAINT player_pk PRIMARY KEY (`playerID`))
+    CONSTRAINT player_pk PRIMARY KEY (`id`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer` (
@@ -16,21 +16,22 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer` (
     CONSTRAINT reviewer_pk PRIMARY KEY (`reviewerID`))
 ;
 
+CREATE TABLE IF NOT EXISTS `gamePlay`.`location` (
+	`locationIndex` INT NOT NULL AUTO_INCREMENT,
+    `City` VARCHAR(45) NOT NULL,
+    `State/Province` VARCHAR(45) NOT NULL,
+    `Country` VARCHAR(45) NOT NULL,
+    CONSTRAINT player_pk PRIMARY KEY (`locationIndex`))
+;
+
 CREATE TABLE IF NOT EXISTS `gamePlay`.`publisher` (
 	`publisherID` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
 	`locationIndex` INT NOT NULL,
     CONSTRAINT publisher_pk PRIMARY KEY (`publisherID`),
-	CONSTRAINT developer_fk FOREIGN KEY (`locationIndex`) 
+	CONSTRAINT publisher_fk FOREIGN KEY (`locationIndex`) 
 		references location(`locationIndex`) 
         ON UPDATE CASCADE ON DELETE CASCADE)
-;
-
-CREATE TABLE IF NOT EXISTS `gamePlay`.`location` (
-	`locationIndex` INT NOT NULL AUTO_INCREMENT,
-    `City` VARCHAR(45) NOT NULL,
-    `Country` VARCHAR(45) NOT NULL,
-    CONSTRAINT player_pk PRIMARY KEY (`locationIndex`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`developer` (
@@ -50,13 +51,13 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`platform` (
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`gameplayGenre` (
-	`gGenreID` INT NOT NULL,
+	`gGenreID` INT NOT NULL AUTO_INCREMENT,
 	`gGenreTitle` VARCHAR(45) NOT NULL,
 	CONSTRAINT game_genre_pk PRIMARY KEY (`gGenreID`))
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`aestheticGenre` (
-	`aGenreID` INT NOT NULL,
+	`aGenreID` INT NOT NULL AUTO_INCREMENT,
 	`aGenreTitle` VARCHAR(45) NOT NULL,
 	CONSTRAINT game_genre_pk PRIMARY KEY (`aGenreID`))
 ;
@@ -91,12 +92,12 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`game` (
 ;
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`player_game` (
-	`playerID` INT NOT NULL,
+	`playerId` INT NOT NULL,
 	`gameID` INT NOT NULL,
 	`playtime` INT,
-    CONSTRAINT playergame_pk PRIMARY KEY (`playerID`, `gameID`),
-	CONSTRAINT game_player_fk1 FOREIGN KEY (`playerID`) 
-		references player(`playerID`) 
+    CONSTRAINT playergame_pk PRIMARY KEY (`playerId`, `gameID`),
+	CONSTRAINT game_player_fk1 FOREIGN KEY (`playerId`) 
+		references player(`id`) 
         ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT game_player_fk2 FOREIGN KEY (`gameID`) 
 		references game(`gameID`) 
@@ -128,3 +129,36 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`platform_game` (
 		references game(`gameID`) 
         ON UPDATE CASCADE ON DELETE CASCADE)
 ;
+
+DROP PROCEDURE IF EXISTS get_users_games;
+DELIMITER //
+CREATE PROCEDURE get_users_games(
+	IN username VARCHAR(45)
+)
+BEGIN
+	DECLARE UID INT;
+    SELECT id INTO UID FROM player WHERE name = username;
+    
+	SELECT gameID, title, dev.name,pub.name 
+    FROM game 
+    INNER JOIN developer AS dev ON game.developerID = dev.developerID 
+    INNER JOIN publisher AS pub ON pub.publisherID = game.publisherID
+    WHERE gameID IN (SELECT gameID FROM player_game WHERE playerId = UID);
+    
+END//
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS add_review;
+DELIMITER //
+CREATE PROCEDURE add_review(
+	IN gameName VARCHAR(45),
+    IN reviewerName VARCHAR(45),
+    IN score INT,
+    IN url VARCHAR(100)
+)
+BEGIN
+	INSERT INTO reviewer_game 
+    VALUES ((SELECT reviewerID FROM reviewer WHERE name = reviewerName),(SELECT gameID FROM game WHERE title = gameName),score,url);
+END//
+DELIMITER ;
+

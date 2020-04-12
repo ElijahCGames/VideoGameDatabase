@@ -108,8 +108,26 @@ class App(Tk):
         Input:
         string username
         """
+        valCur = self.cnx.cursor()
+        userQ = "SELECT id,name FROM player WHERE name = %s"
+        valCur.execute(userQ,username)
+        print(valCur.fetchall())
+        valCur.close()
+
+        valCur = self.cnx.cursor()
+        userQ = "INSERT INTO location (City,`State/Province`,Country) VALUES ('Test','Test','Test')"
+        valCur.execute(userQ)
+        print("Inserted valuess")
+        self.cnx.commit()
+        valCur.close()
+
         self.username.set(username)
-        
+        self.usernameId = 1;
+
+    def login(self,username,password):
+        self.cnx = pymysql.connect(host='127.0.0.1', user=username, password=password,
+                      db='gamePlay', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
+
 # Top Menu
 # This is where most of the functions are avaliable to be selected
 # The long list of one line functions handeles all that
@@ -177,7 +195,7 @@ class AppMenu(Menu):
         self.parent.show_frame("AddGameToDatabase")
 
     def add_review(self):
-        page = AddReview()
+        page = AddReview(self.parent)
 
 
 
@@ -208,17 +226,20 @@ class UserEntry(Frame):
         self.startTitle = Label(self,text="VGDB")
         self.startTitle.pack(side="top",fill="x",pady=10)
         self.usernameEntry = Entry(self)
+        self.sqlUsernameEntry = Entry(self)
         self.passwordEntry = Entry(self,show="*")
         self.submit = Button(self,text="Submit",command=self.submitUsername)
 
         # Rendering elements (either with pack() or grid())
         self.usernameEntry.pack()
+        self.sqlUsernameEntry.pack()
         self.passwordEntry.pack()
         self.submit.pack()
 
     # Function that runs the main logic of the interface
     def submitUsername(self):
         print(self.usernameEntry.get())
+        self.controller.login(self.sqlUsernameEntry.get(),self.passwordEntry.get())
         self.controller.setUsername(self.usernameEntry.get())
         self.controller.makeTheOtherFrames()
         self.controller.show_frame("GameCollection")
@@ -383,9 +404,16 @@ class GameCollection(Frame):
         label.grid(row=0,column=0)
         labelMore.grid(row=0,column=1)
         topLabel.grid(row=0,column=0,sticky="nsew",)
+
         r = 1
-        for name,dev in self.controller.game_array:
-            item = GameListing(self,name,dev)
+        gameListCur = self.controller.cnx.cursor()
+        gameListQ = "CALL get_users_games(%s)"
+        print(self.controller.username.get())
+        gameListCur.execute(gameListQ,self.controller.username.get())
+        self.controller.game_array = [(item['gameID'],item['title'],item['name'],item['pub.name']) for item in gameListCur.fetchall()]
+
+        for gId,name,dev,pub in self.controller.game_array:
+            item = GameListing(self,gId,name,dev,pub)
             item.grid(row=r,column=0,sticky="nsew")
             r+=1
 
@@ -403,8 +431,9 @@ SQL Function:
 Adds new record to the review table
 """
 class AddReview(Toplevel):
-    def __init__(self):
+    def __init__(self,controller):
         Toplevel.__init__(self)
+        self.controller = controller;
 
         self.gameLabel = Label(self,text="Game")
         self.gameEntry = Entry(self)
@@ -412,6 +441,8 @@ class AddReview(Toplevel):
         self.reviewEntry = Entry(self)
         self.scoreLabel = Label(self,text="Score")
         self.score = Spinbox(self,from_=0,to=100)
+        self.urlLabel = Label(self,text="URL")
+        self.urlEntry = Entry(self)
         self.submit = Button(self,text="Submit",command=self.addgame)
 
         self.gameLabel.grid(row=0,column=0)
@@ -420,9 +451,16 @@ class AddReview(Toplevel):
         self.reviewEntry.grid(row=1,column=1)
         self.scoreLabel.grid(row=2,column=0)
         self.score.grid(row=2,column=1)
-        self.submit.grid(row=3,column=0)
+        self.urlLabel.grid(row=3,column=0)
+        self.urlEntry.grid(row=3,column=1)
+        self.submit.grid(row=4,column=0)
 
     def addgame(self):
+        revCursor = self.controller.cnx.cursor()
+        revQ = f"CALL add_review('{self.gameEntry.get()}','{self.reviewEntry.get()}',{self.score.get()},'{self.urlEntry.get()}')"
+        revCursor.execute(revQ)
+        self.controller.cnx.commit()
+        revCursor.close()
         self.destroy()
 """
 Remove Game
@@ -483,7 +521,13 @@ class ChangeUserName(Toplevel):
         self.submit.pack()
 
     def changeUsername(self):
-        self.controller.setUsername(self.usernameEntry.get())
+        self.controller.username.set(self.usernameEntry.get())
+        userUpdateCur = self.controller.cnx.cursor()
+        updateQ = f"UPDATE player SET name='{self.usernameEntry.get()}' WHERE id ={self.controller.usernameId}"
+        userUpdateCur.execute(updateQ)
+        self.controller.cnx.commit()
+        userUpdateCur.close()
+
         self.destroy()
 
 class AboutMyApplication(Toplevel):
@@ -505,16 +549,20 @@ GameListing
 A single listing on the Game Collection page.
 """
 class GameListing(Frame):
-    def __init__(self,parent,name,dev):
+    def __init__(self,parent,gid,name,dev,pub):
         Frame.__init__(self,parent,highlightbackground="black",highlightthickness=1,width=300)
 
+        self.gid = gid;
         self.nameLab = Label(self,text=name)
         self.devLab = Label(self,text="Developer: " + dev)
+        self.pubLab = Label(self,text="Publisher: " + pub)
+
         self.nameLab.grid(row=0,column=0)
         self.devLab.grid(row=0,column=1)
+        self.pubLab.grid(row=1,column=1)
 
 # Sets app, and runs the loop 
-# DO NOT TOUCH
+
 if __name__ == "__main__":
     root = App()
     root.mainloop()
