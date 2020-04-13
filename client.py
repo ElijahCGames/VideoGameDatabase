@@ -42,6 +42,7 @@ class App(Tk):
 
         # Variables to be used througout
         self.username = StringVar()
+        self.gid = 1
 
         # Dictonary of frames
         self.frames = {}
@@ -316,7 +317,104 @@ Allows updates of the game records, and changes to the users game collection.
 class GamePage(Frame):
     def __init__(self,parent,controller):
         Frame.__init__(self,parent)
-        self.controller = controller 
+        self.controller = controller
+        self.populateFrame()
+
+    def populateFrame(self):
+        gameCur = self.controller.cnx.cursor()
+        gameQ = "SELECT * FROM game WHERE gameID = %s"
+        gameCur.execute(gameQ, self.controller.gid)
+        game = gameCur.fetchone()
+        gameLabel = Label(self,text="Title")
+        gameName = Label(self, text=game["title"])
+        descriptionLabel = Label(self,text="Description")
+        description = Label(self,text=game["description"])
+
+
+        devID = game["developerID"]
+        pubID = game["publisherID"]
+        gameplayID = game["gameplayGenre"]
+        aestheticID = game["aestheticGenre"]
+        
+
+
+        ageRatingLabel = Label(self,text="Age Rating")
+        ageRating = Label(self,text=game["ageRating"])
+        localPlayerLabel = Label(self,text="Max Local Players")
+        localPlayer = Label(self,text=game["localPlayer"])
+        onlinePlayerLabel = Label(self,text="Max online players")
+        onlinePlayer = Label(self,text=game["onlinePlayer"])
+        hasMultiplayerLabel = Label(self,text="Has Multiplayer")
+        hasMultiplayer = Label(self,text=game["has_multiplayer"])
+        hasCampaignLabel = Label(self,text="Has Campaign")
+        hasCampaign = Label(self,text=game["has_campaign"])
+        completionTimeLabel = Label(self,text="Completion Time")
+        completionTime = Label(self,text=game["completionTime"])
+        gameCur.close()
+
+        devCur = self.controller.cnx.cursor()
+        devQ = "SELECT name FROM developer WHERE developerID = %s"
+        devCur.execute(devQ, devID)
+        dev = devCur.fetchone()
+        developerLabel = Label(self,text="Developer")
+        developer = Label(self,text=dev["name"])
+        devCur.close()
+
+        pubCur = self.controller.cnx.cursor()
+        pubQ = "SELECT name FROM publisher WHERE publisherID = %s"
+        pubCur.execute(pubQ, pubID)
+        pub = pubCur.fetchone()
+        publisherLabel = Label(self,text="Publisher")
+        publisher = Label(self,text=pub["name"])
+        pubCur.close
+
+
+        gameplayCur = self.controller.cnx.cursor()
+        gameplayQ = "SELECT gGenreTitle FROM gameplayGenre WHERE gGenreID = %s"
+        gameplayCur.execute(gameplayQ, gameplayID)
+        gameplay = gameplayCur.fetchone()
+        gameplayLabel = Label(self,text="Gameplay Genre")
+        gameplayText = Label(self,text=gameplay["gGenreTitle"])
+        gameplayCur.close()
+
+        aestheticCur = self.controller.cnx.cursor()
+        aestheticQ = "SELECT aGenreTitle FROM aestheticGenre WHERE aGenreID = %s"
+        aestheticCur.execute(aestheticQ, aestheticID)
+        aesthetic = aestheticCur.fetchone()
+        aestheticLabel = Label(self,text="Aesthetic Genre")
+        aestheticText = Label(self,text=aesthetic["aGenreTitle"])
+        aestheticCur.close()
+
+        backButton = Button(self,text="Back",command=lambda: self.controller.show_frame("GameCollection"))
+
+        gameLabel.grid(row=0,column=0)
+        gameName.grid(row=0,column=1)
+        ageRatingLabel.grid(row=1,column=0)
+        ageRating.grid(row=1,column=1)
+        descriptionLabel.grid(row=2,column=0)
+        description.grid(row=2,column=1)
+        developerLabel.grid(row=3,column=0)
+        developer.grid(row=3,column=1)
+        publisherLabel.grid(row=4,column=0)
+        publisher.grid(row=4,column=1)
+        gameplayLabel.grid(row=5,column=0)
+        gameplayText.grid(row=5,column=1)
+        aestheticLabel.grid(row=6,column=0)
+        aestheticText.grid(row=6,column=1)
+        localPlayerLabel.grid(row=7,column=0)
+        localPlayer.grid(row=7,column=1)
+        onlinePlayerLabel.grid(row=8,column=0)
+        onlinePlayer.grid(row=8,column=1)
+        hasMultiplayerLabel.grid(row=9,column=0)
+        hasMultiplayer.grid(row=9,column=1)
+        hasCampaignLabel.grid(row=10,column=0)
+        hasCampaign.grid(row=10,column=1)
+        backButton.grid(row=11,column=0)
+        
+        
+        
+        
+        
 
 """
 Recomeendation
@@ -801,14 +899,24 @@ class GameListing(Frame):
     def __init__(self,parent,gid,name,dev,pub):
         Frame.__init__(self,parent,highlightbackground="black",highlightthickness=1,width=300)
 
-        self.gid = gid;
+        self.parent = parent
+        self.gid = gid
+        self.infoButton = Button(self, text="More info",command=self.showInfo)
         self.nameLab = Label(self,text=name)
         self.devLab = Label(self,text="Developer: " + dev)
         self.pubLab = Label(self,text="Publisher: " + pub)
 
-        self.nameLab.grid(row=0,column=0)
-        self.devLab.grid(row=0,column=1)
-        self.pubLab.grid(row=1,column=1)
+        self.infoButton.grid(row=0,column=0)
+        self.nameLab.grid(row=0,column=1)
+        self.devLab.grid(row=0,column=2)
+        self.pubLab.grid(row=1,column=2)
+
+    def showInfo(self):
+        #Show info for this game listing
+        self.parent.controller.gid = self.gid
+        self.parent.controller.repop(GamePage)
+        
+        
 
 # Sets app, and runs the loop 
 
