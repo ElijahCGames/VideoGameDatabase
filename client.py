@@ -109,20 +109,19 @@ class App(Tk):
         string username
         """
         valCur = self.cnx.cursor()
-        userQ = "SELECT id,name FROM player WHERE name = %s"
+        userQ = "SELECT id FROM player WHERE name = %s"
         valCur.execute(userQ,username)
-        print(valCur.fetchall())
+        self.usernameId = [item["id"] for item in valCur.fetchall()]
         valCur.close()
 
         valCur = self.cnx.cursor()
-        userQ = "INSERT INTO location (City,`State/Province`,Country) VALUES ('Test','Test','Test')"
+        userQ = f"SET @uname = '{username}'"
         valCur.execute(userQ)
         print("Inserted valuess")
         self.cnx.commit()
         valCur.close()
 
         self.username.set(username)
-        self.usernameId = 1;
 
     def login(self,username,password):
         self.cnx = pymysql.connect(host='127.0.0.1', user=username, password=password,
@@ -223,17 +222,34 @@ class UserEntry(Frame):
         self.controller = controller
 
         # Setting all element of the UI
-        self.startTitle = Label(self,text="VGDB")
+        self.startTitle = Label(self,text="VGDB",font=("Courier", 44))
         self.startTitle.pack(side="top",fill="x",pady=10)
-        self.usernameEntry = Entry(self)
-        self.sqlUsernameEntry = Entry(self)
-        self.passwordEntry = Entry(self,show="*")
+
+        inputFrame = Frame(self)
+
+        self.usernameLabel = Label(inputFrame,text="Player Name")
+        self.sqlUsernameLabel = Label(inputFrame,text="Database Username")
+        self.passwordLabel = Label(inputFrame,text="Database Password")
+
+        self.usernameEntry = Entry(inputFrame)
+        self.sqlUsernameEntry = Entry(inputFrame)
+
+        self.passwordEntry = Entry(inputFrame,show="*")
         self.submit = Button(self,text="Submit",command=self.submitUsername)
 
+        self.usernameEntry.insert(END,"Elijah")
+        self.sqlUsernameEntry.insert(END,"root")
+        self.passwordEntry.insert(END,"Chile_Tigercat18")
         # Rendering elements (either with pack() or grid())
-        self.usernameEntry.pack()
-        self.sqlUsernameEntry.pack()
-        self.passwordEntry.pack()
+        inputFrame.pack()
+
+        self.usernameLabel.grid(row=0,column=0)
+        self.usernameEntry.grid(row=0,column=1)
+        self.sqlUsernameLabel.grid(row=1,column=0)
+        self.sqlUsernameEntry.grid(row=1,column=1)
+        self.passwordLabel.grid(row=2,column=0)
+        self.passwordEntry.grid(row=2,column=1)
+
         self.submit.pack()
 
     # Function that runs the main logic of the interface
@@ -361,16 +377,95 @@ class AddGameToDatabase(Frame):
         Frame.__init__(self,parent)
         self.controller = controller 
 
-        self.gameNameEntry = Entry(self)
-        self.devNameEntry = Entry(self)
-        self.submitButton = Button(self,text="Submit",command=self.submit_to_database)
+        self.add = Label(self,text="Add Game to Database",font=("Courier", 20))
 
-        self.gameNameEntry.pack()
-        self.devNameEntry.pack()
+        self.rightSide = Frame(self)
+        self.title_desc = Frame(self.rightSide)
+        self.littleThings = Frame(self.rightSide)
+        self.overList = Frame(self)
+        self.lists = Frame(self.overList)
+
+        self.gameName = Entry(self.title_desc)
+
+        self.gameDesc = Text(self.title_desc,height=5,width=20)
+
+        self.age = Entry(self.littleThings)
+        self.multi = Entry(self.littleThings)
+        self.camp = Entry(self.littleThings)
+        self.local = Entry(self.littleThings)
+        self.online = Entry(self.littleThings)
+
+        self.checkVar = BooleanVar()
+        self.add_to = Checkbutton(self.littleThings,text="Add to my\nCollection",variable=self.checkVar)
+
+        self.devs = Listbox(self.lists,exportselection=0)
+        self.pubs = Listbox(self.lists,exportselection=0)
+        self.aGen = Listbox(self.lists,exportselection=0)
+        self.gGen = Listbox(self.lists,exportselection=0)
+        self.submitButton = Button(self.overList,text="Submit",command = self.submit_to_database)
+
+        #INSERTING
+        self.gameName.insert(END,"Game Title")
+
+        devCur = self.controller.cnx.cursor()
+        devQ = "SELECT name FROM developer"
+        devCur.execute(devQ)
+        for name in [item["name"] for item in devCur.fetchall()]:
+            self.devs.insert(END,name)
+        devCur.close()
+
+        pubCur = self.controller.cnx.cursor()
+        pubQ = "SELECT name FROM publisher"
+        pubCur.execute(pubQ)
+        for name in [item["name"] for item in pubCur.fetchall()]:
+            self.pubs.insert(END,name)
+        pubCur.close()
+
+        gCur = self.controller.cnx.cursor()
+        gQ = "SELECT gGenreTitle FROM gameplayGenre"
+        gCur.execute(gQ)
+        for name in [item["gGenreTitle"] for item in gCur.fetchall()]:
+            self.gGen.insert(END,name)
+        gCur.close()
+
+        aCur = self.controller.cnx.cursor()
+        aQ = "SELECT aGenreTitle FROM aestheticGenre"
+        aCur.execute(aQ)
+        for name in [item["aGenreTitle"] for item in aCur.fetchall()]:
+            self.aGen.insert(END,name)
+        aCur.close()
+
+        #PACKING AND GRIDING 
+        self.gameName.pack()
+        self.gameDesc.pack()
+
+        self.age.grid(row=0,column=0)
+        self.multi.grid(row=1,column=0)
+        self.camp.grid(row=1,column=1)
+        self.local.grid(row=2,column=0)
+        self.online.grid(row=2,column=1)
+        self.add_to.grid(row=0,column=1)
+
+        self.devs.grid(row=0,column=0)
+        self.pubs.grid(row=0,column=1)
+        self.aGen.grid(row=1,column=0)
+        self.gGen.grid(row=1,column=1)
+        self.lists.pack()
         self.submitButton.pack()
 
+        self.add.pack(side = TOP)
+        self.rightSide.pack(side=LEFT)
+        self.title_desc.pack()
+        self.littleThings.pack()
+        self.overList.pack(side = RIGHT)
+
     def submit_to_database(self):
-        self.controller.game_array.append((self.gameNameEntry.get(),self.devNameEntry.get()))
+        addCur = self.controller.cnx.cursor()
+        bigQ = f"CALL add_game_to_database('{self.gameName.get()}','{self.gameDesc.get('1.0',END)}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get()}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
+        addCur.execute(bigQ)
+        self.controller.cnx.commit()
+        addCur.close()
+
         print("Adding")
         self.controller.repop(GameCollection)
 

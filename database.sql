@@ -129,6 +129,30 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`platform_game` (
 		references game(`gameID`) 
         ON UPDATE CASCADE ON DELETE CASCADE)
 ;
+DROP PROCEDURE IF EXISTS add_game_to_database;
+DELIMITER //
+CREATE PROCEDURE add_game_to_database(
+	IN gameTitle VARCHAR(45),
+    IN descript VARCHAR(255),
+    IN devId INT,
+    IN pubId INT,
+    IN age VARCHAR(45),
+    IN gID INT,
+    IN aID INT,
+    IN localM INT,
+    IN onlineM INT,
+    IN multi VARCHAR(45),
+    IN camp VARCHAR(45),
+    IN addToCollection BOOLEAN
+)
+BEGIN
+	INSERT INTO game (title,`description`,developerID,publisherID,ageRating,gameplayGenre,aestheticGenre,localPlayer,onlinePlayer,has_multiplayer,has_campaign)
+		VALUES (gameTitle,descript,devId,pubId,age,gID,aID,localM,onlineM,multi,camp);
+	IF addToCollection THEN
+		INSERT INTO player_game VALUES ((SELECT id FROM player WHERE name = @uname),(SELECT LAST_INSERT_ID()),0);
+    END IF;
+END//
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS get_users_games;
 DELIMITER //
