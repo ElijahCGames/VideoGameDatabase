@@ -734,11 +734,10 @@ class RemoveGame(Toplevel):
         Toplevel.__init__(self)
 
         self.controller = controller
-        self.gamelist = Listbox(self,selectmode="BROWSE")
+        self.gamelist = Listbox(self,width=75,height=40,selectmode="BROWSE")
         counter = 1;
-        for game,dev in self.controller.game_array:
-
-            self.gamelist.insert(counter,game)
+        for game in self.controller.game_array:
+            self.gamelist.insert(counter, game)
             counter+=1
 
         self.gamelist.pack()
@@ -748,6 +747,12 @@ class RemoveGame(Toplevel):
     def removegame(self):
         gar = self.controller.game_array
         index = self.gamelist.curselection()[0]
+        gameId = gar[index][0]
+        userId = self.controller.usernameId
+        print(gameId)
+        delCursor = self.controller.cnx.cursor()
+        delQ = "CALL remove_game_from_collection(%s, %s)"
+        delCursor.execute(delQ, (gameId, userId))
         gar.pop(index)
         self.controller.repop(GameCollection)
         self.destroy()
