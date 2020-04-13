@@ -112,7 +112,8 @@ class App(Tk):
         valCur = self.cnx.cursor()
         userQ = "SELECT id FROM player WHERE name = %s"
         valCur.execute(userQ,username)
-        self.usernameId = [item["id"] for item in valCur.fetchall()]
+        self.usernameId = [item["id"] for item in valCur.fetchall()][0]
+        print(self.usernameId)
         valCur.close()
 
         valCur = self.cnx.cursor()
@@ -182,7 +183,7 @@ class AppMenu(Menu):
     def collection_options(self,subMenu):
         subMenu.add_command(label="Add Game",command=self.add_game)
         subMenu.add_command(label="Remove Game",command=self.remove_game)
-        subMenu.add_command(label="Reccomend Game",command=self.rec_game)
+        #subMenu.add_command(label="Reccomend Game",command=self.rec_game)
 
     def data_options(self,subMenu):
         subMenu.add_command(label="Add Game",command=self.add_data_game)
@@ -354,6 +355,10 @@ class GamePage(Frame):
         hasCampaign = Label(self,text=game["has_campaign"])
         completionTimeLabel = Label(self,text="Completion Time")
         completionTime = Label(self,text=game["completionTime"])
+        reviewScoreLabel = Label(self,text="Review Score")
+        reviewScore = Label(self,text=game["reviewScore"])
+        self.timeplayedLabel = Label(self,text="Time Played")
+        self.timeplayed = Entry(self)
         gameCur.close()
 
         devCur = self.controller.cnx.cursor()
@@ -389,7 +394,12 @@ class GamePage(Frame):
         aestheticText = Label(self,text=aesthetic["aGenreTitle"])
         aestheticCur.close()
 
-        backButton = Button(self,text="Back",command=lambda: self.controller.show_frame("GameCollection"))
+        backButton = Button(self,text="Back",command=self.go_back)
+        removeButton = Button(self,text="Remove From Collection",command=self.remove_game)
+
+        timeP = self.controller.get_from_database(f"SELECT playtime FROM player_game WHERE playerID = {self.controller.usernameId} AND gameID = {self.controller.gid}")
+        if(len(timeP)>0):
+            self.timeplayed.insert(END,timeP[0]["playtime"])
 
         gameLabel.grid(row=0,column=0)
         gameName.grid(row=0,column=1)
@@ -413,13 +423,22 @@ class GamePage(Frame):
         hasMultiplayer.grid(row=9,column=1)
         hasCampaignLabel.grid(row=10,column=0)
         hasCampaign.grid(row=10,column=1)
-        backButton.grid(row=11,column=0)
+        reviewScoreLabel.grid(row=11,column=0)
+        reviewScore.grid(row=11,column=1)
+        self.timeplayedLabel.grid(row=12,column=0)
+        self.timeplayed.grid(row=12,column=1)
+        backButton.grid(row=13,column=0)
         
-        
-        
-        
-        
+    def go_back(self):
+        upCur = self.controller.cnx.cursor()
+        upQ = f"UPDATE player_game SET playtime = {self.timeplayed.get()} WHERE playerID = {self.controller.usernameId} AND gameID = {self.controller.gid}"
+        upCur.execute(upQ)
+        self.controller.cnx.commit()
+        upCur.close()
+        self.controller.show_frame("GameCollection")
 
+    def remove_game(self):
+        pass
 """
 Recomeendation
 Interface Function:
@@ -691,14 +710,26 @@ class AddReview(Toplevel):
         self.controller = controller;
 
         self.gameLabel = Label(self,text="Game")
-        self.gameEntry = Entry(self)
+        self.gameEntry = Listbox(self,exportselection=0)
         self.reviewLabel = Label(self,text="Reviewer")
-        self.reviewEntry = Entry(self)
+        self.reviewEntry = Listbox(self,exportselection=0)
         self.scoreLabel = Label(self,text="Score")
         self.score = Spinbox(self,from_=0,to=100)
         self.urlLabel = Label(self,text="URL")
         self.urlEntry = Entry(self)
         self.submit = Button(self,text="Submit",command=self.addgame)
+
+        gQ = "SELECT gameID,title FROM game"
+        items = self.controller.get_from_database(gQ)
+        self.gameIDS = [item["gameID"] for item in items]
+        for name in [item["title"] for item in items]:
+            self.gameEntry.insert(END,name)
+
+        rQ = "SELECT reviewerID,name FROM reviewer"
+        items = self.controller.get_from_database(rQ)
+        self.rIDS = [item["reviewerID"] for item in items]
+        for name in [item["name"] for item in items]:
+            self.reviewEntry.insert(END,name)
 
         self.gameLabel.grid(row=0,column=0)
         self.gameEntry.grid(row=0,column=1)
@@ -712,7 +743,8 @@ class AddReview(Toplevel):
 
     def addgame(self):
         revCursor = self.controller.cnx.cursor()
-        revQ = f"CALL add_review('{self.gameEntry.get()}','{self.reviewEntry.get()}',{self.score.get()},'{self.urlEntry.get()}')"
+        print(self.rIDS[self.reviewEntry.curselection()[0]])
+        revQ = f"INSERT INTO reviewer_game VALUES ({self.rIDS[self.reviewEntry.curselection()[0]]},{self.gameIDS[self.gameEntry.curselection()[0]]},{self.score.get()},'{self.urlEntry.get()}')"
         revCursor.execute(revQ)
         self.controller.cnx.commit()
         revCursor.close()
@@ -946,10 +978,10 @@ class GameListing(Frame):
         self.devLab = Label(self,text="Developer: " + dev)
         self.pubLab = Label(self,text="Publisher: " + pub)
 
-        self.infoButton.grid(row=0,column=0)
         self.nameLab.grid(row=0,column=1)
         self.devLab.grid(row=0,column=2)
         self.pubLab.grid(row=1,column=2)
+        self.infoButton.grid(row=2,column=0)
 
     def showInfo(self):
         #Show info for this game listing

@@ -1,11 +1,11 @@
 CREATE SCHEMA IF NOT EXISTS `gamePlay` default character set utf8;
 USE `gamePlay`;
 
-
 CREATE TABLE IF NOT EXISTS `gamePlay`.`player` (
 	`id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) UNIQUE NOT NULL,
     `gender` VARCHAR(45) NOT NULL,
+    `playtime` INT,
     CONSTRAINT player_pk PRIMARY KEY (`id`))
 ;
 
@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`game` (
 	`has_multiplayer` VARCHAR(45) NOT NULL,
 	`has_campaign` VARCHAR(45) NOT NULL,
 	`completionTime` INT,
+	`reviewScore` INT,
     CONSTRAINT game_pk PRIMARY KEY (`gameID`),
 	CONSTRAINT game_fk1 FOREIGN KEY (`developerID`) 
 		references developer(`developerID`) 
@@ -108,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer_game` (
 	`reviewerID` INT NOT NULL,
 	`gameID` INT NOT NULL,
 	`reviewScore` INT NOT NULL,
-	`url` VARCHAR(100) NOT NULL,
+	`url` VARCHAR(100),
     CONSTRAINT reviewergame_pk PRIMARY KEY (`reviewerID`, `gameID`),
 	CONSTRAINT game_review_fk1 FOREIGN KEY (`reviewerID`) 
 			references reviewer(`reviewerID`) 
@@ -172,20 +173,6 @@ BEGIN
 END//
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS add_review;
-DELIMITER //
-CREATE PROCEDURE add_review(
-	IN gameName VARCHAR(45),
-    IN reviewerName VARCHAR(45),
-    IN score INT,
-    IN url VARCHAR(100)
-)
-BEGIN
-	INSERT INTO reviewer_game 
-    VALUES ((SELECT reviewerID FROM reviewer WHERE name = reviewerName),(SELECT gameID FROM game WHERE title = gameName),score,url);
-END//
-DELIMITER ;
-
 DROP PROCEDURE IF EXISTS remove_game_from_collection;
 DELIMITER //
 CREATE PROCEDURE remove_game_from_collection(
@@ -200,3 +187,22 @@ BEGIN
 END//
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS insert_reveiw;
+DELIMITER //
+CREATE TRIGGER insert_reveiw
+AFTER INSERT
+ON reviewer_game FOR EACH ROW
+BEGIN
+	UPDATE game SET game.reviewScore = (SELECT AVG(reviewScore) FROM reviewer_game WHERE gameID = NEW.gameID) WHERE NEW.gameID = game.gameID;
+END//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS update_playtime;
+DELIMITER //
+CREATE TRIGGER update_playtime
+AFTER UPDATE
+ON player_game FOR EACH ROW
+BEGIN
+	UPDATE player SET player.playtime = (SELECT SUM(playtime) FROM player_game WHERE playerId = NEW.playerId) WHERE player.id = NEW.playerId;
+END//
+DELIMITER ;
