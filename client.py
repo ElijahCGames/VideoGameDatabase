@@ -187,6 +187,7 @@ class AppMenu(Menu):
         subMenu.add_command(label="Add Game",command=self.add_data_game)
         subMenu.add_command(label="Add Review",command=self.add_review)
         subMenu.add_command(label="Add Location",command=self.add_location)
+        subMenu.add_command(label="Add Platform",command=self.add_platform)
 
     # Functions that run when assocaited menu function is selected
     def change_username(self):
@@ -212,6 +213,9 @@ class AppMenu(Menu):
 
     def add_location(self):
         page = AddLoc(self.parent)
+
+    def add_platform(self):
+        page = AddPlatform(self.parent)
 
 
 
@@ -511,7 +515,7 @@ class AddGameToDatabase(Frame):
         print("Adding")
         self.controller.repop(GameCollection)
 
-        page = ChoosePlatforms(self.controller,self.controller.get_from_database("SELECT MAX(gameID) FROM game"))
+        page = ChoosePlatforms(self.controller,self.controller.get_from_database("SELECT MAX(gameID) as gi FROM game")[0]["gi"])
 
 
     def openDevBox(self):
@@ -676,7 +680,7 @@ class ChangeUserName(Toplevel):
 
         self.destroy()
 
-class ChoosePlatforms():
+class ChoosePlatforms(Toplevel):
     def __init__(self,controller,gameID):
         Toplevel.__init__(self)
 
@@ -685,16 +689,23 @@ class ChoosePlatforms():
 
         self.gameTitle = self.controller.get_from_database(f"SELECT title FROM game WHERE gameID = {self.gId}")[0]["title"]
 
-        self.topLabel = Label(self,text="Choose what platforms " + gameTitle + " is on.")
+        self.topLabel = Label(self,text="Choose what platforms " + self.gameTitle + " is on.")
 
-        self.platList = Listbox(self,exportselection=0)
+        self.platList = Listbox(self,exportselection=0,selectmode = MULTIPLE)
         self.save = Button(self,text="Submit",command=self.set_platforms)
 
-        for name in [self.controller.get_from_database(f"SELECT name FROM platform")]:
-            platList.insert(END,name)
+        for name in [item['name'] for item in self.controller.get_from_database(f"SELECT name FROM platform")]:
+            self.platList.insert(END,name)
+
+        self.topLabel.pack()
+        self.platList.pack()
+        self.save.pack()
 
     def set_platforms(self):
-        pass
+        itemTup = self.platList.curselection()
+        for item in itemTup:
+            self.controller.add_to_database(f"INSERT INTO platform_game VALUES ({item + 1},{self.gId})")
+        self.destroy()
 
 class AddDev(Toplevel):
     def __init__(self,controller):
@@ -777,6 +788,23 @@ class AddLoc(Toplevel):
     def add_loc(self):
         locQ = f"INSERT INTO location (city,`state/province`,country) VALUES ('{self.city.get()}','{self.state.get()}','{self.country.get()}')"
         self.controller.add_to_database(locQ)
+        self.destroy()
+
+class AddPlatform(Toplevel):
+    def __init__(self,controller):
+        Toplevel.__init__(self)
+
+        self.controller = controller
+
+        self.platform = Entry(self)
+        self.platform.insert(END,"Platform Name")
+        self.submit = Button(self,text="Submit",command=self.add_plat)
+        self.platform.pack()
+        self.submit.pack()
+
+    def add_plat(self):
+        platQ = f"INSERT INTO platform (name) VALUES ('{self.platform.get()}')"
+        self.controller.add_to_database(platQ)
         self.destroy()
 
 class AboutMyApplication(Toplevel):
