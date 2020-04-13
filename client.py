@@ -606,8 +606,15 @@ class AddGameToDatabase(Frame):
         self.littleThings.pack()
         self.overList.pack(side = RIGHT)
 
+
     def submit_to_database(self):
-        bigQ = f"CALL add_game_to_database('{self.gameName.get()}','{self.gameDesc.get('1.0',END)}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get()}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
+        # Formatting apostrophes with double apostrophes to appease MySQL
+        gameText = self.gameName.get()
+        adjustedGameText = gameText.replace("'", "''")
+        descText = self.gameDesc.get('1.0',END)
+        adjustedDescText = descText.replace("'", "''")
+        
+        bigQ = f"CALL add_game_to_database('{adjustedGameText}','{adjustedDescText}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get()}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
         self.controller.add_to_database(bigQ)
 
         print("Adding")
@@ -727,11 +734,10 @@ class RemoveGame(Toplevel):
         Toplevel.__init__(self)
 
         self.controller = controller
-        self.gamelist = Listbox(self,selectmode="BROWSE")
+        self.gamelist = Listbox(self,width=75,height=40,selectmode="BROWSE")
         counter = 1;
-        for game,dev in self.controller.game_array:
-
-            self.gamelist.insert(counter,game)
+        for game in self.controller.game_array:
+            self.gamelist.insert(counter, game)
             counter+=1
 
         self.gamelist.pack()
@@ -741,6 +747,12 @@ class RemoveGame(Toplevel):
     def removegame(self):
         gar = self.controller.game_array
         index = self.gamelist.curselection()[0]
+        gameId = gar[index][0]
+        userId = self.controller.usernameId
+        print(gameId)
+        delCursor = self.controller.cnx.cursor()
+        delQ = "CALL remove_game_from_collection(%s, %s)"
+        delCursor.execute(delQ, (gameId, userId))
         gar.pop(index)
         self.controller.repop(GameCollection)
         self.destroy()
