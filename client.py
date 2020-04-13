@@ -32,7 +32,7 @@ class App(Tk):
         Tk.__init__(self,*args, **kwargs)
         self.title("Video Game Database")
         self.option_add('*tearOff', FALSE)
-        self.geometry("800x400")
+        self.geometry("800x600")
 
         # Sets options for the display
         self.container = Frame(self)
@@ -127,6 +127,19 @@ class App(Tk):
         self.cnx = pymysql.connect(host='127.0.0.1', user=username, password=password,
                       db='gamePlay', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor)
 
+    def add_to_database(self,querey):
+        cur = self.cnx.cursor()
+        cur.execute(querey)
+        self.cnx.commit()
+        cur.close()
+
+    def get_from_database(self,querey):
+        cur = self.cnx.cursor()
+        cur.execute(querey)
+        temp = cur.fetchall()
+        cur.close()
+        return temp
+
 # Top Menu
 # This is where most of the functions are avaliable to be selected
 # The long list of one line functions handeles all that
@@ -173,6 +186,7 @@ class AppMenu(Menu):
     def data_options(self,subMenu):
         subMenu.add_command(label="Add Game",command=self.add_data_game)
         subMenu.add_command(label="Add Review",command=self.add_review)
+        subMenu.add_command(label="Add Location",command=self.add_location)
 
     # Functions that run when assocaited menu function is selected
     def change_username(self):
@@ -195,6 +209,9 @@ class AppMenu(Menu):
 
     def add_review(self):
         page = AddReview(self.parent)
+
+    def add_location(self):
+        page = AddLoc(self.parent)
 
 
 
@@ -375,7 +392,9 @@ class AddGameToDatabase(Frame):
     def __init__(self,parent,controller):
         Frame.__init__(self,parent)
         self.controller = controller 
+        self.populateFrame()
 
+    def populateFrame(self):
         self.add = Label(self,text="Add Game to Database",font=("Courier", 20))
 
         self.rightSide = Frame(self)
@@ -397,10 +416,22 @@ class AddGameToDatabase(Frame):
         self.checkVar = BooleanVar()
         self.add_to = Checkbutton(self.littleThings,text="Add to my\nCollection",variable=self.checkVar)
 
-        self.devs = Listbox(self.lists,exportselection=0)
-        self.pubs = Listbox(self.lists,exportselection=0)
-        self.aGen = Listbox(self.lists,exportselection=0)
-        self.gGen = Listbox(self.lists,exportselection=0)
+        self.listOfBoxes = [Frame(self.lists) for i in range(0,4)]
+
+        self.devL = Label(self.listOfBoxes[0],text="Developer")
+        self.devs = Listbox(self.listOfBoxes[0],exportselection=0)
+        self.addDev = Button(self.listOfBoxes[0],text="Add Developer",command=self.openDevBox)
+
+        self.pubL = Label(self.listOfBoxes[2],text="Publisher")
+        self.pubs = Listbox(self.listOfBoxes[2],exportselection=0)
+        self.addPub = Button(self.listOfBoxes[2],text="Add Publisher",command=self.openPubBox)
+
+        self.aGenL = Label(self.listOfBoxes[1],text="Aesthetic Genre")
+        self.aGen = Listbox(self.listOfBoxes[1],exportselection=0)
+
+        self.gGenL = Label(self.listOfBoxes[3],text="Gameplay Genre")
+        self.gGen = Listbox(self.listOfBoxes[3],exportselection=0)
+
         self.submitButton = Button(self.overList,text="Submit",command = self.submit_to_database)
 
         #INSERTING
@@ -434,6 +465,12 @@ class AddGameToDatabase(Frame):
             self.aGen.insert(END,name)
         aCur.close()
 
+        self.age.insert(END,"Age Rating")
+        self.camp.insert(END,"Has Campaign")
+        self.multi.insert(END,"Has Multiplayer")
+        self.local.insert(END,"#Local Players")
+        self.online.insert(END,"#Online Players")
+
         #PACKING AND GRIDING 
         self.gameName.pack()
         self.gameDesc.pack()
@@ -445,10 +482,19 @@ class AddGameToDatabase(Frame):
         self.online.grid(row=2,column=1)
         self.add_to.grid(row=0,column=1)
 
-        self.devs.grid(row=0,column=0)
-        self.pubs.grid(row=0,column=1)
-        self.aGen.grid(row=1,column=0)
-        self.gGen.grid(row=1,column=1)
+        self.devL.pack()
+        self.devs.pack()
+        self.addDev.pack()
+        self.pubL.pack()
+        self.pubs.pack()
+        self.addPub.pack()
+        self.aGenL.pack()
+        self.aGen.pack()
+        self.gGenL.pack()
+        self.gGen.pack()
+        for i in range(len(self.listOfBoxes)):
+            self.listOfBoxes[i].grid(row=i%2,column=i//2)
+
         self.lists.pack()
         self.submitButton.pack()
 
@@ -459,14 +505,20 @@ class AddGameToDatabase(Frame):
         self.overList.pack(side = RIGHT)
 
     def submit_to_database(self):
-        addCur = self.controller.cnx.cursor()
         bigQ = f"CALL add_game_to_database('{self.gameName.get()}','{self.gameDesc.get('1.0',END)}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get()}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
-        addCur.execute(bigQ)
-        self.controller.cnx.commit()
-        addCur.close()
+        self.controller.add_to_database(bigQ)
 
         print("Adding")
         self.controller.repop(GameCollection)
+
+        page = ChoosePlatforms(self.controller,self.controller.get_from_database("SELECT MAX(gameID) FROM game"))
+
+
+    def openDevBox(self):
+        page = AddDev(self.controller)
+
+    def openPubBox(self):
+        page = AddPub(self.controller)
 
 
 """
@@ -622,6 +674,109 @@ class ChangeUserName(Toplevel):
         self.controller.cnx.commit()
         userUpdateCur.close()
 
+        self.destroy()
+
+class ChoosePlatforms():
+    def __init__(self,controller,gameID):
+        Toplevel.__init__(self)
+
+        self.controller = controller;
+        self.gId = gameID
+
+        self.gameTitle = self.controller.get_from_database(f"SELECT title FROM game WHERE gameID = {self.gId}")[0]["title"]
+
+        self.topLabel = Label(self,text="Choose what platforms " + gameTitle + " is on.")
+
+        self.platList = Listbox(self,exportselection=0)
+        self.save = Button(self,text="Submit",command=self.set_platforms)
+
+        for name in [self.controller.get_from_database(f"SELECT name FROM platform")]:
+            platList.insert(END,name)
+
+    def set_platforms(self):
+        pass
+
+class AddDev(Toplevel):
+    def __init__(self,controller):
+        Toplevel.__init__(self)
+
+        self.controller = controller
+
+        self.devEntry = Entry(self)
+        self.devEntry.insert(END,"Developer Name")
+        self.locationBox = Listbox(self,exportselection=0)
+
+        locCur = self.controller.cnx.cursor()
+        locQ = "SELECT city,`state/province` FROM location"
+        locCur.execute(locQ)
+        for city,state in [(item["city"],item["state/province"]) for item in locCur.fetchall()]:
+            self.locationBox.insert(END,city + ", " + state)
+        locCur.close()
+
+        self.save = Button(self,text="Save",command=self.add_dev)
+
+        self.devEntry.pack()
+        self.locationBox.pack()
+        self.save.pack()
+
+
+    def add_dev(self):
+        devQ = f"INSERT INTO developer (name,locationIndex) VALUES ('{self.devEntry.get()}',{self.locationBox.curselection()[0] + 1})"
+        self.controller.add_to_database(devQ)
+        self.controller.repop(AddGameToDatabase)
+        self.destroy()
+
+class AddPub(Toplevel):
+    def __init__(self,controller):
+        Toplevel.__init__(self)
+
+        self.controller = controller
+
+        self.pubEntry = Entry(self)
+        self.pubEntry.insert(END,"Publisher Name")
+        self.locationBox = Listbox(self,exportselection=0)
+
+        locCur = self.controller.cnx.cursor()
+        locQ = "SELECT city, `state/province` FROM location"
+        locCur.execute(locQ)
+        for city,state in [(item["city"],item["state/province"]) for item in locCur.fetchall()]:
+            self.locationBox.insert(END,city + ", " + state)
+        locCur.close()
+
+        self.save = Button(self,text="Save",command=self.add_pub)
+
+        self.pubEntry.pack()
+        self.locationBox.pack()
+        self.save.pack()
+
+    def add_pub(self):
+        pubQ = f"INSERT INTO publisher (name,locationIndex) VALUES ('{self.pubEntry.get()}',{self.locationBox.curselection()[0] + 1})"
+        self.controller.add_to_database(pubQ)
+        self.controller.repop(AddGameToDatabase)
+        self.destroy()
+
+class AddLoc(Toplevel):
+    def __init__(self,controller):
+        Toplevel.__init__(self)
+
+        self.controller = controller
+
+        self.city = Entry(self)
+        self.state = Entry(self)
+        self.country = Entry(self)
+        self.city.insert(END,"City")
+        self.state.insert(END,"State/Province")
+        self.country.insert(END,"Country")
+        self.save = Button(self,text="Submit",command=self.add_loc)
+
+        self.city.pack()
+        self.state.pack()
+        self.country.pack()
+        self.save.pack()
+
+    def add_loc(self):
+        locQ = f"INSERT INTO location (city,`state/province`,country) VALUES ('{self.city.get()}','{self.state.get()}','{self.country.get()}')"
+        self.controller.add_to_database(locQ)
         self.destroy()
 
 class AboutMyApplication(Toplevel):

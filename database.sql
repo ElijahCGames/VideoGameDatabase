@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS `gamePlay`.`reviewer` (
 
 CREATE TABLE IF NOT EXISTS `gamePlay`.`location` (
 	`locationIndex` INT NOT NULL AUTO_INCREMENT,
-    `City` VARCHAR(45) NOT NULL,
-    `State/Province` VARCHAR(45) NOT NULL,
-    `Country` VARCHAR(45) NOT NULL,
+    `city` VARCHAR(45) NOT NULL,
+    `state/province` VARCHAR(45),
+    `country` VARCHAR(45) NOT NULL,
     CONSTRAINT player_pk PRIMARY KEY (`locationIndex`))
 ;
 
