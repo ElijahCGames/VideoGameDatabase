@@ -239,7 +239,6 @@ class UserEntry(Frame):
 
         self.usernameEntry.insert(END,"Elijah")
         self.sqlUsernameEntry.insert(END,"root")
-        self.passwordEntry.insert(END,"Chile_Tigercat18")
         # Rendering elements (either with pack() or grid())
         inputFrame.pack()
 
