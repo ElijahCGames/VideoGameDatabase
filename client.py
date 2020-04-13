@@ -748,11 +748,11 @@ class RemoveGame(Toplevel):
         gar = self.controller.game_array
         index = self.gamelist.curselection()[0]
         gameId = gar[index][0]
-        userId = self.controller.usernameId
-        print(gameId)
+        userId = self.controller.usernameId[0]
         delCursor = self.controller.cnx.cursor()
         delQ = "CALL remove_game_from_collection(%s, %s)"
         delCursor.execute(delQ, (gameId, userId))
+        self.controller.cnx.commit()
         gar.pop(index)
         self.controller.repop(GameCollection)
         self.destroy()

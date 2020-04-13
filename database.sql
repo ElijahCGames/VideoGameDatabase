@@ -189,14 +189,15 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS remove_game_from_collection;
 DELIMITER //
 CREATE PROCEDURE remove_game_from_collection(
-	IN gameName VARCHAR(45),
-    IN playerName VARCHAR(45)
+	IN gameId INT,
+    IN playerId INT
 )
 BEGIN
 	DELETE FROM player_game WHERE
-		playerId = (SELECT id FROM player WHERE name = playerName)
-    AND
-		gameID = (SELECT id FROM game WHERE title = gameName);
+		player_game.gameID = gameId
+	AND
+		player_game.playerId = playerId;
+		
 END//
 DELIMITER ;
 
