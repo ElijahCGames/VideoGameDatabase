@@ -335,12 +335,12 @@ class UserPage(Frame):
 
     def populateFrame(self):
         self.userName = Label(self,textvariable=self.controller.username)
-        self.playyime = Label(self,text="User Playtime")
-        self.playTime = Label(self,text=self.controller.get_from_database(f"SELECT playtime FROM player WHERE id = {self.controller.usernameId}"))
+        self.playTime = Label(self,text=f"User Playtime: " + str(self.controller.get_from_database(f"SELECT playtime FROM player WHERE id = {self.controller.usernameId}")[0]["playtime"]))
         self.backButton = Button(self,text="Back",command=lambda: self.controller.show_frame("GameCollection"))
         self.deleteUser = Button(self,text="Delete User",command=self.deleteUserPopup)
 
         self.userName.pack()
+        self.playTime.pack()
         self.backButton.pack()
         self.deleteUser.pack()
 
