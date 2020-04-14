@@ -11,9 +11,6 @@ Input a users name
 Adding games from a user's collection
 Removing games from a user's collection
 
-
-Recommending a game from collection or database based on parameters
-
 Adding a review
 (Game reviews are based on the average of all the reviews associated with a specfic game)
 
@@ -289,7 +286,7 @@ class UserEntry(Frame):
         self.passwordEntry = Entry(inputFrame,show="*")
         self.submit = Button(self,text="Submit",command=self.submitUsername)
 
-        self.usernameEntry.insert(END,"Elijah")
+        self.usernameEntry.insert(END,"demo")
         self.sqlUsernameEntry.insert(END,"root")
         # Rendering elements (either with pack() or grid())
         inputFrame.pack()
@@ -760,7 +757,8 @@ class AddGameToCollection(Toplevel):
         gameColl = self.controller.get_from_database(gameQ)
         self.gIDs = [item["gameID"] for item in gameColl]
         for name in [item["title"] for item in gameColl]:
-            self.nameEntry.insert(END,name)
+            if(name not in [item[1] for item in self.controller.game_array]):
+                self.nameEntry.insert(END,name)
         backButton.pack()
         self.nameEntry.pack()
         submitButton.pack()
@@ -902,6 +900,19 @@ class ChangeUserName(Toplevel):
 
         self.destroy()
 
+"""
+Choose Platfrom
+
+Interface Function:
+Allows user to choose platforms for a new game.
+
+Interaction:
+Select from a list of platfroms
+
+SQL Function:
+Creates new entries in the platform_game table
+"""
+
 class ChoosePlatforms(Toplevel):
     def __init__(self,controller,gameID):
         Toplevel.__init__(self)
@@ -929,6 +940,18 @@ class ChoosePlatforms(Toplevel):
             self.controller.add_to_database(f"INSERT INTO platform_game VALUES ({item + 1},{self.gId})")
         self.destroy()
 
+"""
+Add Developer
+
+Interface Function:
+Allows user to add new Developer
+
+Interaction:
+Entry for the name of the developer, and location
+
+SQL Function:
+Creates new developer
+"""
 class AddDev(Toplevel):
     def __init__(self,controller):
         Toplevel.__init__(self)
@@ -959,6 +982,19 @@ class AddDev(Toplevel):
         self.controller.repop(AddGameToDatabase)
         self.destroy()
 
+"""
+Add Publisher
+
+Interface Function:
+Allows user to add new publisher
+
+Interaction:
+Entry for the name of the publisher, and location
+
+SQL Function:
+Creates new publisher
+"""
+
 class AddPub(Toplevel):
     def __init__(self,controller):
         Toplevel.__init__(self)
@@ -988,6 +1024,20 @@ class AddPub(Toplevel):
         self.controller.repop(AddGameToDatabase)
         self.destroy()
 
+"""
+Add Location
+
+Interface Function:
+Allows user to add new locations
+
+Interaction:
+Entry for the name of the city, regiom, and country.
+
+SQL Function:
+Creates new location
+"""
+
+
 class AddLoc(Toplevel):
     def __init__(self,controller):
         Toplevel.__init__(self)
@@ -1011,6 +1061,18 @@ class AddLoc(Toplevel):
         locQ = f"INSERT INTO location (city,`state/province`,country) VALUES ('{self.city.get()}','{self.state.get()}','{self.country.get()}')"
         self.controller.add_to_database(locQ)
         self.destroy()
+"""
+Add Platform
+
+Interface Function:
+Allows user to add new platforms
+
+Interaction:
+Entry for the name of the platfrom
+
+SQL Function:
+Creates new platfrom
+"""
 
 class AddPlatform(Toplevel):
     def __init__(self,controller):
@@ -1029,6 +1091,18 @@ class AddPlatform(Toplevel):
         self.controller.add_to_database(platQ)
         self.destroy()
 
+"""
+About My Application
+
+Interface Function:
+Gives some information about the database.
+
+Interaction:
+Can look at it
+
+SQL Function:
+N/A
+"""
 class AboutMyApplication(Toplevel):
     def __init__(self):
         Toplevel.__init__(self)

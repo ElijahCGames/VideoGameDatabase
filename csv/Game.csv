@@ -1,6 +1,6 @@
-gameID,Title,Description ,developerID,publisherID,ageRating,gameplayGenre,aestheticGenre,localPlayer,onlinePlayer,has_multiplayer,has_campagin,completionTime
-1,Animal Crossing: New Horizons,,1,1,E,2,2,8,8,TRUE,TRUE,50
-2,Persona 5,,2,2,M,1,1,1,0,FALSE,TRUE,80
-3,Gears 5,,32,9,M,3,5,3,10,TRUE,TRUE,10
-4,The Witcher 3: Wild Hunt,,37,14,M,34,1,1,0,FALSE,TRUE,51
-5,Celeste,,4,12,E10,5,14,1,0,FALSE,TRUE,8
+gameID,Title,Description ,developerID,publisherID,ageRating,gameplayGenre,aestheticGenre,localPlayer,onlinePlayer,has_multiplayer,has_campagin,completionTime,reveiwScore
+1,Animal Crossing: New Horizons,,1,1,E,2,2,8,8,TRUE,TRUE,50,9
+2,Persona 5,,2,2,M,1,1,1,0,FALSE,TRUE,80,7
+3,Gears 5,,32,9,M,3,5,3,10,TRUE,TRUE,10,0
+4,The Witcher 3: Wild Hunt,,37,14,M,34,1,1,0,FALSE,TRUE,51,0
+5,Celeste,,4,12,E10,5,14,1,0,FALSE,TRUE,8,0

@@ -1,6 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS `gamePlay` default character set utf8;
 USE `gamePlay`;
 
+# CREATE TABLES
 CREATE TABLE IF NOT EXISTS `gamePlay`.`player` (
 	`id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) UNIQUE NOT NULL,
