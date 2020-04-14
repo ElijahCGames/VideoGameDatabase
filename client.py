@@ -194,13 +194,11 @@ class AppMenu(Menu):
         menu_user = Menu(self)
         menu_collection = Menu(self)
         menu_data = Menu(self)
-        menu_window = Menu(self,name = "window")
 
         # Adds rest of menus
         self.add_cascade(menu=menu_user, label='User')
         self.add_cascade(menu=menu_collection, label='Collection')
         self.add_cascade(menu=menu_data, label='Data')
-        self.add_cascade(menu=menu_window, label='Window')
 
         # Adds menu functions
         self.user_options(menu_user)
@@ -755,7 +753,7 @@ class AddGameToCollection(Toplevel):
         self.controller = controller 
 
         self.nameEntry = Listbox(self,exportselection=0)
-        backButton = Button(self,text="Back",command=lambda: controller.show_frame("GameCollection"))
+        backButton = Button(self,text="Back",command=lambda: self.destroy())
         submitButton = Button(self,text="Submit",command=self.searchGame)
 
         gameQ = "SELECT gameID,title FROM game"
