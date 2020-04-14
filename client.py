@@ -567,7 +567,7 @@ class AddGameToDatabase(Frame):
 
         self.gameDesc = Text(self.title_desc,height=5,width=20)
 
-        self.age = Entry(self.littleThings)
+        self.age = Listbox(self.littleThings, selectmode=SINGLE,height=5)
         self.multi = Entry(self.littleThings)
         self.camp = Entry(self.littleThings)
         self.local = Entry(self.littleThings)
@@ -625,7 +625,12 @@ class AddGameToDatabase(Frame):
             self.aGen.insert(END,name)
         aCur.close()
 
-        self.age.insert(END,"Age Rating")
+        self.age.insert(END,"E")
+        self.age.insert(END,"E10")
+        self.age.insert(END,"T")
+        self.age.insert(END,"M")
+        self.age.insert(END,"AO")
+
         self.camp.insert(END,"Has Campaign")
         self.multi.insert(END,"Has Multiplayer")
         self.local.insert(END,"#Local Players")
@@ -672,7 +677,7 @@ class AddGameToDatabase(Frame):
         descText = self.gameDesc.get('1.0',END)
         adjustedDescText = descText.replace("'", "''")
         
-        bigQ = f"CALL add_game_to_database('{adjustedGameText}','{adjustedDescText}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get()}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
+        bigQ = f"CALL add_game_to_database('{adjustedGameText}','{adjustedDescText}',{self.devs.curselection()[0] + 1},{self.pubs.curselection()[0] + 1},'{self.age.get(ACTIVE)[0]}',{self.gGen.curselection()[0] + 1},{self.aGen.curselection()[0] + 1},{self.local.get()},{self.online.get()},'{self.multi.get()}','{self.camp.get()}',{self.checkVar.get()})"
         self.controller.add_to_database(bigQ)
 
         print("Adding")
