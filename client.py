@@ -51,7 +51,6 @@ class App(Tk):
         self.mainPages = (
             GameCollection,UserPage,
             GamePage,Recomendation,
-            AddGameToCollection,
             AddGameToDatabase)
 
         # Dummy Data for testing (will not be in final version)
@@ -112,15 +111,47 @@ class App(Tk):
         valCur = self.cnx.cursor()
         userQ = "SELECT id FROM player WHERE name = %s"
         valCur.execute(userQ,username)
-        self.usernameId = [item["id"] for item in valCur.fetchall()][0]
-        print(self.usernameId)
-        valCur.close()
+        try:
+            self.usernameId = [item["id"] for item in valCur.fetchall()][0]
+            print(self.usernameId)
+            valCur.close()
+            self.setUsername2(username)
+        except: 
+            print("Hello there everyone")
+            p = Toplevel()
+            sText = Label(p,text="This user doesn't exist. Please input a gender for the user.")
+            stexo = Label(p,text="The application will need to shutdown to fully register a new user.")
+            stexp = Label(p,text="Please relaunch the app and input the username: to use the app")
 
+            sEntry = Entry(p)
+            sButton = Button(p,text="Submit",command = lambda: self.newUsername(username,sEntry,p))
+            sText.pack()
+            stexo.pack()
+            stexp.pack()
+            sEntry.pack()
+            sButton.pack()
+
+
+    def newUsername(self,username,entry,p):
+        print(username)
+        print(entry.get())
+        add_uQ = f"INSERT INTO player (name,gender,playtime) VALUES ('{username}','{entry.get()}',0)"
+        self.add_to_database(add_uQ)
+        getIdQ = "SELECT MAX(id) as id FROM player"
+        print(self.get_from_database(getIdQ)[0])
+        self.usernameId = self.get_from_database(getIdQ)[0]['id']
+
+        self.setUsername2(username)
+        p.destroy()
+        self.destroy()
+
+    def setUsername2(self,username):
         valCur = self.cnx.cursor()
         userQ = f"SET @uname = '{username}'"
         valCur.execute(userQ)
-        print("Inserted valuess")
+        print("Inserted values")
         self.cnx.commit()
+
         valCur.close()
 
         self.username.set(username)
@@ -199,7 +230,7 @@ class AppMenu(Menu):
         self.parent.show_frame("UserPage")
 
     def add_game(self):
-        self.parent.show_frame("AddGameToCollection")
+        page = AddGameToCollection(self.parent)
 
     def remove_game(self):
         page = RemoveGame(self.parent)
@@ -278,9 +309,13 @@ class UserEntry(Frame):
     def submitUsername(self):
         print(self.usernameEntry.get())
         self.controller.login(self.sqlUsernameEntry.get(),self.passwordEntry.get())
-        self.controller.setUsername(self.usernameEntry.get())
-        self.controller.makeTheOtherFrames()
-        self.controller.show_frame("GameCollection")
+        try:
+            self.controller.setUsername(self.usernameEntry.get())
+        except:
+            print("AddNew")
+        else:
+            self.controller.makeTheOtherFrames()
+            self.controller.show_frame("GameCollection")
 
 """
 User Page
@@ -300,13 +335,43 @@ class UserPage(Frame):
 
     def populateFrame(self):
         self.userName = Label(self,textvariable=self.controller.username)
+        self.playyime = Label(self,text="User Playtime")
+        self.playTime = Label(self,text=self.controller.get_from_database(f"SELECT playtime FROM player WHERE id = {self.controller.usernameId}"))
         self.backButton = Button(self,text="Back",command=lambda: self.controller.show_frame("GameCollection"))
+        self.deleteUser = Button(self,text="Delete User",command=self.deleteUserPopup)
 
         self.userName.pack()
         self.backButton.pack()
+        self.deleteUser.pack()
 
     def goToGameCollection(self):
         self.controller.show_frame("GameCollection")
+
+    def deleteUserPopup(self):
+        p = Toplevel(self)
+        self.warningText = Label(p,text="Are you sure? This will delete your entire presense from the database.")
+        self.warningText2 = Label(p,text="If you are sure, type your username here and hit the delete button")
+        self.warningText3 = Label(p,text="This will close the app.")
+        self.checkEntry = Entry(p)
+        self.deleteButton = Button(p,text="Delete",command=self.delete)
+
+        self.warningText.pack()
+        self.warningText2.pack()
+        self.checkEntry.pack()
+        self.deleteButton.pack()
+
+    def delete(self):
+        if(self.checkEntry.get() == self.controller.username.get()):
+            deleteCur = self.controller.cnx.cursor()
+            deleteQ = f"CALL delete_user('{self.checkEntry.get()}')"
+            deleteCur.execute(deleteQ)
+            self.controller.cnx.commit()
+            deleteCur.close()
+            self.controller.cnx.close()
+            self.controller.destroy()
+
+        else:
+            self.checkEntry.insert(END," Retry")
 
 """
 Game Page
@@ -397,7 +462,7 @@ class GamePage(Frame):
         backButton = Button(self,text="Back",command=self.go_back)
         removeButton = Button(self,text="Remove From Collection",command=self.remove_game)
 
-        timeP = self.controller.get_from_database(f"SELECT playtime FROM player_game WHERE playerID = {self.controller.usernameId} AND gameID = {self.controller.gid}")
+        timeP = self.controller.get_from_database(f"SELECT playtime FROM player_game WHERE playerId = {self.controller.usernameId} AND gameID = {self.controller.gid}")
         if(len(timeP)>0):
             self.timeplayed.insert(END,timeP[0]["playtime"])
 
@@ -471,32 +536,6 @@ class Recomendation(Frame):
     def searchGame(self):
         self.controller.repop(GameCollection)
 
-"""
-Add Game to Collection:
-Interface Function:
-Allows for specfic game search and adding
-Interaction:
-User searches for a game, and will get the game back with the option of adding the game to their collection.
-
-SQL Function:
-Adds record to the user_game table with the new addition to the collection 
-
-"""
-
-class AddGameToCollection(Frame):
-    def __init__(self,parent,controller):
-        Frame.__init__(self,parent)
-        self.controller = controller 
-
-        nameEntry = Entry(self)
-        backButton = Button(self,text="Back",command=lambda: controller.show_frame("GameCollection"))
-        submitButton = Button(self,text="Submit",command=self.searchGame)
-        backButton.pack()
-        nameEntry.pack()
-        submitButton.pack()
-
-    def searchGame(self):
-        self.controller.repop(GameCollection)
 
 """
 Add Game to Database
@@ -694,6 +733,43 @@ class GameCollection(Frame):
 # POPUPS
 
 """
+Add Game to Collection:
+Interface Function:
+Allows for specfic game search and adding
+Interaction:
+User searches for a game, and will get the game back with the option of adding the game to their collection.
+
+SQL Function:
+Adds record to the user_game table with the new addition to the collection 
+
+"""
+
+class AddGameToCollection(Toplevel):
+    def __init__(self,controller):
+        Toplevel.__init__(self)
+        self.controller = controller 
+
+        self.nameEntry = Listbox(self,exportselection=0)
+        backButton = Button(self,text="Back",command=lambda: controller.show_frame("GameCollection"))
+        submitButton = Button(self,text="Submit",command=self.searchGame)
+
+        gameQ = "SELECT gameID,title FROM game"
+        gameColl = self.controller.get_from_database(gameQ)
+        self.gIDs = [item["gameID"] for item in gameColl]
+        for name in [item["title"] for item in gameColl]:
+            self.nameEntry.insert(END,name)
+        backButton.pack()
+        self.nameEntry.pack()
+        submitButton.pack()
+
+    def searchGame(self):
+        addQ = f"INSERT INTO player_game (playerId,gameID,playtime) VALUES ({self.controller.usernameId},{self.gIDs[self.nameEntry.curselection()[0]]},0) "
+        self.controller.add_to_database(addQ)
+        self.controller.repop(GameCollection)
+        self.destroy()
+
+
+"""
 Add Review
 
 Interface Function:
@@ -780,7 +856,8 @@ class RemoveGame(Toplevel):
         gar = self.controller.game_array
         index = self.gamelist.curselection()[0]
         gameId = gar[index][0]
-        userId = self.controller.usernameId[0]
+
+        userId = self.controller.usernameId
         delCursor = self.controller.cnx.cursor()
         delQ = "CALL remove_game_from_collection(%s, %s)"
         delCursor.execute(delQ, (gameId, userId))

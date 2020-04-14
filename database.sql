@@ -188,6 +188,20 @@ BEGIN
 END//
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS delete_user;
+DELIMITER //
+CREATE PROCEDURE delete_user(
+	IN username VARCHAR(45)
+)
+BEGIN
+	DECLARE uID INT;
+    SELECT id INTO uID FROM player WHERE name = username;
+    DELETE FROM player_game WHERE
+		playerId = uID;
+	DELETE FROM player WHERE id = uID;
+END//
+DELIMITER ;
+
 DROP TRIGGER IF EXISTS insert_reveiw;
 DELIMITER //
 CREATE TRIGGER insert_reveiw
