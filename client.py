@@ -755,10 +755,11 @@ class AddGameToCollection(Toplevel):
 
         gameQ = "SELECT gameID,title FROM game"
         gameColl = self.controller.get_from_database(gameQ)
-        self.gIDs = [item["gameID"] for item in gameColl]
-        for name in [item["title"] for item in gameColl]:
+        self.gIDs = []
+        for name,gid in [(item["title"],item["gameID"]) for item in gameColl]:
             if(name not in [item[1] for item in self.controller.game_array]):
                 self.nameEntry.insert(END,name)
+                self.gIDs.append(gid)
         backButton.pack()
         self.nameEntry.pack()
         submitButton.pack()
